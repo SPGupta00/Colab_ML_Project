@@ -1,39 +1,44 @@
-if (!requireNamespace("jsonlite", quietly = TRUE)) install.packages("jsonlite", repos="https://r-project.org")
 library(jsonlite)
 
-data <- read.csv("data/data.csv")
+args <- commandArgs(trailingOnly = TRUE)
+data_path <- if (length(args) > 0) args[1] else "data/data.csv"
+
+data <- read.csv(data_path)
 
 numeric_cols <- sapply(data, is.numeric)
 data_numeric <- data[, numeric_cols, drop = FALSE]
 data_numeric$id <- NULL
 data_numeric$X <- NULL
 
+columns_to_check <- colnames(data_numeric)
 results_list <- list()
-all_anomaly_indices <- logical(nrow(data))
 
-for (col_name in colnames(data_numeric)) {
+for (col_name in columns_to_check) {
   target_column <- data_numeric[[col_name]]
   
   mean_value <- mean(target_column, na.rm = TRUE)
   sd_value <- sd(target_column, na.rm = TRUE)
   
-  if (sd_value > 0) {
+  if (!is.na(sd_value) && sd_value > 0) {
     z_scores <- (target_column - mean_value) / sd_value
     anomaly_logical <- abs(z_scores) > 2
-    all_anomaly_indices <- all_anomaly_indices | anomaly_logical
+    
+    id_vector <- data$id[anomaly_logical]
+    value_vector <- target_column[anomaly_logical]
+    
+    if (length(id_vector) == 0) {
+      id_vector <- vector()
+      value_vector <- vector()
+    }
     
     results_list[[col_name]] <- list(
       mean = round(mean_value, 2),
       sd = round(sd_value, 2),
-      anomaly_values = target_column[anomaly_logical]
+      has_anomalies = any(anomaly_logical),
+      anomaly_ids = as.vector(id_vector),
+      anomaly_values = as.vector(value_vector)
     )
   }
 }
 
-output_payload <- list(
-  column_metrics = results_list,
-  anomaly_rows = data[all_anomaly_indices, , drop = FALSE],
-  normal_rows = data[!all_anomaly_indices, , drop = FALSE]
-)
-
-cat(toJSON(output_payload, auto_unbox = TRUE, pretty = TRUE))
+cat(toJSON(results_list, auto_unbox = TRUE))

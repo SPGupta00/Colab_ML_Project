@@ -1,141 +1,86 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
     <title>K-Means Clustering</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
 </head>
-
 <body>
-
     <header>
-
         <h1>K-Means Clustering</h1>
-
         <a href="/">Home</a>
-
     </header>
 
+    <div class="container" style="display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; padding: 20px;">
+        <!-- Left Column: Controls and Numeric Results -->
+        <div style="flex: 1; min-width: 300px;">
+            <div class="model-box" style="margin-bottom: 20px;">
+                <h2>Run K-Means Model</h2>
+                <label style="display: block; margin-bottom: 8px;">Number of Clusters</label>
+                <input type="number" id="clusters" value="3" min="2" max="10" style="margin-bottom: 12px; padding: 6px; width: 100%;">
+                <button onclick="runModel()" style="padding: 8px 16px; cursor: pointer;">
+                    Run Model
+                </button>
+            </div>
 
-    <div class="container">
-
-        <div class="model-box">
-
-            <h2>Run K-Means Model</h2>
-
-            <label>Number of Clusters</label>
-
-            <input type="number" id="clusters" value="3" min="2" max="10">
-
-            <button onclick="runModel()">
-                Run Model
-            </button>
-
+            <div id="result" class="result">
+                <h2>Results</h2>
+                <p>Run the model to see results.</p>
+            </div>
         </div>
 
-
-        <div id="result" class="result">
-
-            <h2>Results</h2>
-
-            <p>Run the model to see results.</p>
-
+        <!-- Right Column: Visual Graph Plot Holder -->
+        <div id="plot-container" style="flex: 1.5; display: none; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0;">Cluster Visualization Plot</h3>
+            <img id="kmeans-plot" src="" alt="K-Means Cluster Plot" style="width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px;">
         </div>
-
     </div>
 
-
     <script>
-
         function runModel() {
-
-            let clusters =
-                document.getElementById("clusters").value;
-
+            let clusters = document.getElementById("clusters").value;
             let formData = new FormData();
-
             formData.append("clusters", clusters);
 
+            // Clear previous contents or display a temporary loading state
+            document.getElementById("result").innerHTML = "<h2>Processing...</h2><p>Executing R pipeline models...</p>";
+            document.getElementById("plot-container").style.display = "none";
 
             fetch("/run-kmeans", {
-
                 method: "POST",
-
                 body: formData
-
             })
-
                 .then(response => response.json())
-
                 .then(data => {
-
                     if (data.error) {
-
-                        document.getElementById("result").innerHTML =
-                            "<h2>Error</h2><p>" + data.error + "</p>";
-
+                        document.getElementById("result").innerHTML = "<h2>Error</h2><p>" + data.error + "</p>";
                         return;
-
                     }
 
-
+                    // 1. Build and display the text metrics response block
                     let html = "";
-
                     html += "<h2>" + data.model + "</h2>";
-
-                    html +=
-                        "<p>Total Data Points: "
-                        + data.total_points
-                        + "</p>";
-
-                    html +=
-                        "<p>Number of Clusters: "
-                        + data.clusters
-                        + "</p>";
-
-
+                    html += "<p><strong>Total Data Points:</strong> " + data.total_points + "</p>";
+                    html += "<p><strong>Number of Clusters:</strong> " + data.clusters + "</p>";
                     html += "<h3>Cluster Sizes</h3>";
-
                     html += "<ul>";
-
-                    data.cluster_sizes.forEach(
-                        function (size, index) {
-
-                            html +=
-                                "<li>Cluster "
-                                + (index + 1)
-                                + ": "
-                                + size
-                                + " points</li>";
-
-                        }
-                    );
-
+                    data.cluster_sizes.forEach(function (size, index) {
+                        html += "<li>Cluster " + (index + 1) + ": " + size + " points</li>";
+                    });
                     html += "</ul>";
+                    document.getElementById("result").innerHTML = html;
 
-
-                    document.getElementById("result").innerHTML =
-                        html;
-
+                    // 2. Safely capture the plot URL and update the image asset node
+                    if (data.plot_url) {
+                        const plotImg = document.getElementById("kmeans-plot");
+                        // Use a timestamp parameter (?t=) to prevent aggressive browser image caching
+                        plotImg.src = data.plot_url + "?t=" + new Date().getTime();
+                        document.getElementById("plot-container").style.display = "block";
+                    }
                 })
-
                 .catch(error => {
-
-                    document.getElementById("result").innerHTML =
-                        "<h2>Error</h2><p>"
-                        + error
-                        + "</p>";
-
+                    document.getElementById("result").innerHTML = "<h2>Error</h2><p>" + error + "</p>";
                 });
-
         }
-
     </script>
-
 </body>
-
 </html>

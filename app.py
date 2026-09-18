@@ -6,26 +6,21 @@ from flask import Flask, jsonify, render_template, request
 app = Flask(__name__)
 R_PATH = "Rscript"
 
-
 @app.route("/")
 def home():
     return render_template("index.html")
-
 
 @app.route("/kmeans")
 def kmeans_page():
     return render_template("kmeans.html")
 
+@app.route("/hierarchial")
+def hierarchial_page():
+    return render_template("hierarchial.html")
 
-@app.route("/hierarchical")
-def hierarchical_page():
-    return render_template("hierarchical.html")
-
-
-@app.route("/anomaly_detection_z_score")
-def anomaly_page():
-    return render_template("anomaly_detection_z_score.html")
-
+@app.route("/anomaly_detection_z_scoring")
+def pca_page():
+    return render_template("anomaly_detection_z_scoring.html")
 
 @app.route("/run-kmeans", methods=["POST"])
 def run_kmeans():
@@ -42,12 +37,11 @@ def run_kmeans():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-@app.route("/run-hierarchical", methods=["POST"])
-def run_hierarchical():
+@app.route("/run-hierarchial", methods=["POST"])
+def run_hierarchial():
     try:
         result = subprocess.run(
-            [R_PATH, "r_models/hierarchical.R", "data/data.csv"],
+            [R_PATH, "r_models/hierarchial.R", "data/data.csv"],
             capture_output=True,
             text=True,
         )
@@ -57,16 +51,11 @@ def run_hierarchical():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-@app.route("/run-anomaly_detection_z_score", methods=["POST"])
-def run_anomaly_detection():
+@app.route("/run-anomaly_detection_z_scoring", methods=["POST"])
+def run_anomaly_model():  # Renamed function to avoid naming collisions
     try:
         result = subprocess.run(
-            [
-                R_PATH,
-                "r_models/anomaly_detection_z_scoring.R",
-                "data/data.csv",
-            ],
+            [R_PATH, "r_models/anomaly_detection_z_scoring.R", "data/data.csv"],
             capture_output=True,
             text=True,
         )
@@ -75,7 +64,6 @@ def run_anomaly_detection():
         return jsonify(json.loads(result.stdout))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == "__main__":
     app.run(debug=True)
