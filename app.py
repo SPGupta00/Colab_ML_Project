@@ -7,116 +7,64 @@ app = Flask(__name__)
 
 R_PATH = "Rscript"
 
-
 @app.route("/")
 def home():
     return render_template("index.html")
-
 
 @app.route("/kmeans")
 def kmeans_page():
     return render_template("kmeans.html")
 
+@app.route("/hierarchial")
+def hierarchial_page():
+    return render_template("hierarchial.html")
 
-@app.route("/hierarchical")
-def hierarchical_page():
-    return render_template("hierarchical.html")
-
-
-@app.route("/pca")
+@app.route("/anomaly_detection_z_scoring")
 def pca_page():
-    return render_template("pca.html")
-
+    return render_template("anomaly_detection_z_scoring.html")
 
 @app.route("/run-kmeans", methods=["POST"])
 def run_kmeans():
-
     clusters = request.form.get("clusters", "3")
-
     try:
-
         result = subprocess.run(
-            [
-                R_PATH,
-                "r_models/kmeans.R",
-                "data/data.csv",
-                clusters
-            ],
+            [R_PATH, "r_models/kmeans.R", "data/data.csv", clusters],
             capture_output=True,
             text=True
         )
-
         if result.returncode != 0:
-            return jsonify({
-                "error": result.stderr
-            }), 500
-
+            return jsonify({"error": result.stderr}), 500
         return jsonify(json.loads(result.stdout))
-
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-        return jsonify({
-            "error": str(e)
-        }), 500
-
-
-@app.route("/run-hierarchical", methods=["POST"])
-def run_hierarchical():
-
+@app.route("/run-hierarchial", methods=["POST"])
+def run_hierarchial():
     try:
-
         result = subprocess.run(
-            [
-                R_PATH,
-                "r_models/hierarchical.R",
-                "data/data.csv"
-            ],
+            [R_PATH, "r_models/hierarchial.R", "data/data.csv"],
             capture_output=True,
             text=True
         )
-
         if result.returncode != 0:
-            return jsonify({
-                "error": result.stderr
-            }), 500
-
+            return jsonify({"error": result.stderr}), 500
         return jsonify(json.loads(result.stdout))
-
     except Exception as e:
-
-        return jsonify({
-            "error": str(e)
-        }), 500
-
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/run-anomaly_detection_z_model", methods=["POST"])
-def run_pca():
-
+def run_anomaly_model():  # Renamed function to avoid naming collisions
     try:
-
         result = subprocess.run(
-            [
-                R_PATH,
-                "r_models/anomaly_detection_z_model.R",
-                "data/data.csv"
-            ],
+            [R_PATH, "r_models/anomaly_detection_z_model.R", "data/data.csv"],
             capture_output=True,
             text=True
         )
-
         if result.returncode != 0:
-            return jsonify({
-                "error": result.stderr
-            }), 500
-
+            return jsonify({"error": result.stderr}), 500
         return jsonify(json.loads(result.stdout))
-
     except Exception as e:
-
-        return jsonify({
-            "error": str(e)
-        }), 500
-
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

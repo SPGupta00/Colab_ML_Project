@@ -1,124 +1,70 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
-    <title>Hierarchical Clustering</title>
-
+    <title>hierarchial Clustering</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
 </head>
-
 <body>
-
     <header>
-
-        <h1>Hierarchical Clustering</h1>
-
+        <h1>hierarchial Clustering</h1>
         <a href="/">Home</a>
-
     </header>
 
-
     <div class="container">
-
         <div class="model-box">
-
-            <h2>Hierarchical Clustering</h2>
-
-            <p>
-                Method: Ward.D2
-            </p>
-
-            <button onclick="runModel()">
-                Run Model
-            </button>
-
+            <h2>hierarchial Clustering Model</h2>
+            <p>Method: Complete Linkage</p>
+            <button onclick="runModel()">Run Model</button>
         </div>
-
 
         <div id="result" class="result">
-
             <h2>Results</h2>
-
+            <p>Run the model to see output data points and assigned clusters.</p>
         </div>
-
     </div>
 
-
     <script>
-
         function runModel() {
+            document.getElementById("result").innerHTML = "<h2>Processing...</h2><p>Running R script clustering calculations...</p>";
 
-            fetch("/run-hierarchical", {
-
+            fetch("/run-hierarchial", {
                 method: "POST"
-
             })
+            .then(response => response.json())
+            .then(payload => {
+                if (payload.error) {
+                    document.getElementById("result").innerHTML = "<h2>Error</h2><p>" + payload.error + "</p>";
+                    return;
+                }
 
-                .then(response => response.json())
+                // Extracted array sent from R list(data = dframe)
+                let records = payload.data; 
 
-                .then(data => {
-
-                    if (data.error) {
-
-                        document.getElementById("result").innerHTML =
-                            "<h2>Error</h2><p>"
-                            + data.error
-                            + "</p>";
-
-                        return;
-
-                    }
-
-
-                    let html = "";
-
-                    html +=
-                        "<h2>"
-                        + data.model
-                        + "</h2>";
-
-                    html +=
-                        "<p>Total Data Points: "
-                        + data.total_points
-                        + "</p>";
-
-                    html +=
-                        "<p>Clusters: "
-                        + data.clusters
-                        + "</p>";
-
-                    html += "<h3>Cluster Sizes</h3>";
-
-                    html += "<ul>";
-
-                    data.cluster_sizes.forEach(
-                        function (size, index) {
-
-                            html +=
-                                "<li>Cluster "
-                                + (index + 1)
-                                + ": "
-                                + size
-                                + " points</li>";
-
-                        }
-                    );
-
-                    html += "</ul>";
-
-
-                    document.getElementById("result").innerHTML =
-                        html;
-
+                let html = "<h2>Hierarchial Clustering Completed</h2>";
+                html += "<p><strong>Total Processed Points:</strong> " + records.length + "</p>";
+                
+                // Construct a table to present the row points and assigned clusters
+                html += "<h3>Assigned Data Clusters</h3>";
+                html += "<table border='1' style='width:100%; border-collapse: collapse; text-align: left;'>";
+                html += "<tr style='background-color: #f2f2f2;'><th>Customer ID</th><th>Age</th><th>Annual Income</th><th>Spending Score</th><th>Assigned Cluster</th></tr>";
+                
+                records.forEach(row => {
+                    html += `<tr>
+                        <td>${row.CustomerID || 'N/A'}</td>
+                        <td>${row.Age || 'N/A'}</td>
+                        <td>${row.AnnualIncome || 'N/A'}</td>
+                        <td>${row.SpendingScore || 'N/A'}</td>
+                        <td><strong style="color: blue;">Cluster ${row.Cluster}</strong></td>
+                    </tr>`;
                 });
+                html += "</table>";
 
+                document.getElementById("result").innerHTML = html;
+            })
+            .catch(error => {
+                document.getElementById("result").innerHTML = "<h2>JavaScript Error</h2><p>" + error + "</p>";
+            });
         }
-
     </script>
-
 </body>
-
 </html>
