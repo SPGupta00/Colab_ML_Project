@@ -28,7 +28,9 @@
             <h2>Results</h2>
         </div>
     </div>
-
+        <footer>
+        <p>Anomaly Detection Z Score Model Demo.</p>
+    </footer>
     <script>
         function runModel() {
             const resultDiv = document.getElementById("result");
@@ -56,11 +58,16 @@
                     html += "<span class='metric-badge'><strong>SD:</strong> " + colData.sd + "</span>";
                     html += "</div>";
 
-                    if (colData.has_anomalies && colData.anomaly_ids.length > 0) {
+                    let ids = Array.isArray(colData.anomaly_ids) ? colData.anomaly_ids : [colData.anomaly_ids];
+                    let vals = Array.isArray(colData.anomaly_values) ? colData.anomaly_values : [colData.anomaly_values];
+
+                    if (colData.has_anomalies && ids.length > 0 && ids[0] !== null) {
                         html += "<p style='color:#c62828; font-weight:bold; margin-bottom:5px;'>Anomalies Found:</p>";
                         html += "<ul class='anomaly-list'>";
-                        for (let i = 0; i < colData.anomaly_ids.length; i++) {
-                            html += "<li><strong>ID " + colData.anomaly_ids[i] + ":</strong> Value: " + colData.anomaly_values[i] + " (Z-Score > 2)</li>";
+                        for (let i = 0; i < ids.length; i++) {
+                            if(ids[i] !== undefined && vals[i] !== undefined) {
+                                html += "<li><strong>Customer ID " + ids[i] + ":</strong> Value: " + Number(vals[i]).toLocaleString() + "</li>";
+                            }
                         }
                         html += "</ul>";
                     } else {
