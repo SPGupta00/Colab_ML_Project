@@ -1,28 +1,39 @@
-# 1. Load the data from your text string (or file)
+if (!requireNamespace("jsonlite", quietly = TRUE)) install.packages("jsonlite", repos="https://r-project.org")
+library(jsonlite)
+
 data <- read.csv("data/data.csv")
 
-columns_to_check <- c("Age", "AnnualIncome", "SpendingScore")
+numeric_cols <- sapply(data, is.numeric)
+data_numeric <- data[, numeric_cols, drop = FALSE]
+data_numeric$id <- NULL
+data_numeric$X <- NULL
 
-for (col_name in columns_to_check) {
-  cat("=========================================\n")
-  cat("Analyzing Column:", col_name, "\n")
-  cat("=========================================\n")
-  
-  target_column <- data[[col_name]]
+results_list <- list()
+all_anomaly_indices <- logical(nrow(data))
+
+for (col_name in colnames(data_numeric)) {
+  target_column <- data_numeric[[col_name]]
   
   mean_value <- mean(target_column, na.rm = TRUE)
   sd_value <- sd(target_column, na.rm = TRUE)
   
-  z_scores <- (target_column - mean_value) / sd_value
-  anomaly_logical <- abs(z_scores) > 2
-  
-  cat("Mean:", round(mean_value, 2), " | SD:", round(sd_value, 2), "\n\n")
-  
-  if (any(anomaly_logical)) {
-    cat(" Anomaly values found:\n")
-    print(target_column[anomaly_logical])
-  } else {
-    cat("No anomalies found (all values fall within 2 standard deviations).\n")
+  if (sd_value > 0) {
+    z_scores <- (target_column - mean_value) / sd_value
+    anomaly_logical <- abs(z_scores) > 2
+    all_anomaly_indices <- all_anomaly_indices | anomaly_logical
+    
+    results_list[[col_name]] <- list(
+      mean = round(mean_value, 2),
+      sd = round(sd_value, 2),
+      anomaly_values = target_column[anomaly_logical]
+    )
   }
-  cat("\n")
 }
+
+output_payload <- list(
+  column_metrics = results_list,
+  anomaly_rows = data[all_anomaly_indices, , drop = FALSE],
+  normal_rows = data[!all_anomaly_indices, , drop = FALSE]
+)
+
+cat(toJSON(output_payload, auto_unbox = TRUE, pretty = TRUE))

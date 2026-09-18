@@ -1,19 +1,20 @@
-data <- read.csv("data/data.csv")
+if (!requireNamespace("jsonlite", quietly = TRUE)) install.packages("jsonlite", repos="https://r-project.org")
+library(jsonlite)
 
-dframe <- data.frame(data)
+dframe <- read.csv("data/data.csv")
 
-distance <- dist(dframe)
+numeric_cols <- sapply(dframe, is.numeric)
+data_cluster <- dframe[, numeric_cols, drop = FALSE]
+data_cluster$id <- NULL
+data_cluster$X <- NULL
 
-print(distance)
-
-
+distance <- dist(data_cluster)
 hc <- hclust(distance, method = "complete")
 
-print(hc)
+dframe$Cluster <- cutree(hc, k = 3)
 
-plot(
-  hc,
-  main = "Hierarchial Clustering Tech",
-  xlab = "Annual Income",
-  ylab = "Spending Score"
+output_payload <- list(
+  data = dframe
 )
+
+cat(toJSON(output_payload, auto_unbox = TRUE, pretty = TRUE))

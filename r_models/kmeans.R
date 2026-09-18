@@ -1,30 +1,25 @@
+if (!requireNamespace("jsonlite", quietly = TRUE)) install.packages("jsonlite", repos="https://r-project.org")
+library(jsonlite)
 
-data <- read.csv("data/data.csv")
+args <- commandArgs(trailingOnly = TRUE)
+data_path <- if (length(args) >= 1) args[1] else "data/data.csv"
+num_clusters <- if (length(args) >= 2) as.integer(args[2]) else 3
 
-dframe <- data.frame(data)
-data_cluster <- dframe[, c("AnnualIncome", "SpendingScore")]
+dframe <- read.csv(data_path)
+
+numeric_cols <- sapply(dframe, is.numeric)
+data_cluster <- dframe[, numeric_cols, drop = FALSE]
+data_cluster$id <- NULL
+data_cluster$X <- NULL
 
 set.seed(123)
-kmeans_model <- kmeans(data_cluster, centers = 3)
-
-print(kmeans_model)
-print(kmeans_model$centers)
+kmeans_model <- kmeans(data_cluster, centers = num_clusters)
 
 dframe$Cluster <- kmeans_model$cluster
 
-plot(
-  dframe$AnnualIncome, dframe$SpendingScore,
-  col = dframe$Cluster,
-  pch = 19,
-  main = "Annual Income Vs Spending Score",
-  xlab = "Annual Income",
-  ylab = "Spending Score"
+output_payload <- list(
+  centers = as.data.frame(kmeans_model$centers),
+  data = dframe
 )
 
-points(
-  kmeans_model$centers[,"AnnualIncome"],
-  kmeans_model$centers[,"SpendingScore"],
-  pch = 8,
-  cex = 2,
-  lwd = 2
-)
+cat(toJSON(output_payload, auto_unbox = TRUE, pretty = TRUE))

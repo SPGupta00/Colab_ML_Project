@@ -7,7 +7,6 @@ app = Flask(__name__)
 R_PATH = "Rscript"
 
 
-# --- HTML Page Routes ---
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -24,11 +23,10 @@ def hierarchical_page():
 
 
 @app.route("/anomaly_detection_z_score")
-def pca_page():
+def anomaly_page():
     return render_template("anomaly_detection_z_score.html")
 
 
-# --- API Execution Routes ---
 @app.route("/run-kmeans", methods=["POST"])
 def run_kmeans():
     clusters = request.form.get("clusters", "3")
@@ -61,7 +59,7 @@ def run_hierarchical():
 
 
 @app.route("/run-anomaly_detection_z_score", methods=["POST"])
-def run_pca():
+def run_anomaly_detection():
     try:
         result = subprocess.run(
             [
