@@ -5,69 +5,68 @@
 
     <title>Unsupervised Machine Learning</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 </head>
 
 <body>
 
-<header>
+    <header>
 
-    <h1>Unsupervised Machine Learning</h1>
+        <h1>Unsupervised Machine Learning</h1>
 
-    <p>R + Flask Machine Learning Demonstration</p>
+        <p>R + Flask Machine Learning Demonstration</p>
 
-</header>
+    </header>
 
 
-<div class="container">
+    <div class="container">
 
-    <div class="card">
+        <div class="card">
 
-        <h2>K-Means Clustering</h2>
+            <h2>K-Means Clustering</h2>
 
-        <p>
-            Groups similar data points into clusters.
-        </p>
+            <p>
+                Groups similar data points into clusters.
+            </p>
 
-        <a href="/kmeans">
-            <button>Open Model</button>
-        </a>
+            <a href="/kmeans">
+                <button>Open Model</button>
+            </a>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>Hierarchical Clustering</h2>
+
+            <p>
+                Creates a hierarchy of clusters using a dendrogram.
+            </p>
+
+            <a href="/hierarchical">
+                <button>Open Model</button>
+            </a>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>Principal Component Analysis</h2>
+
+            <p>
+                Reduces the dimensionality of numerical data.
+            </p>
+
+            <a href="/pca">
+                <button>Open Model</button>
+            </a>
+
+        </div>
 
     </div>
-
-
-    <div class="card">
-
-        <h2>Hierarchical Clustering</h2>
-
-        <p>
-            Creates a hierarchy of clusters using a dendrogram.
-        </p>
-
-        <a href="/hierarchical">
-            <button>Open Model</button>
-        </a>
-
-    </div>
-
-
-    <div class="card">
-
-        <h2>Principal Component Analysis</h2>
-
-        <p>
-            Reduces the dimensionality of numerical data.
-        </p>
-
-        <a href="/anomaly_detection_z_score">
-            <button>Open Model</button>
-        </a>
-
-    </div>
-
-</div>
 
 </body>
 
