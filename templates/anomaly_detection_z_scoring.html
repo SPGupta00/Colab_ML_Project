@@ -1,120 +1,81 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
     <title>AD</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
+    <style>
+        .column-card { border: 1px solid #ddd; border-radius: 4px; padding: 15px; margin-bottom: 15px; background: #fff; }
+        .column-header { font-size: 18px; margin-top: 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .metric-badge { display: inline-block; background: #f2f2f2; padding: 4px 8px; border-radius: 4px; margin-right: 10px; font-size: 14px; }
+        .no-anomaly { color: #2e7d32; font-weight: bold; margin-top: 10px; }
+        .anomaly-list { color: #c62828; margin-top: 10px; padding-left: 20px; }
+    </style>
 </head>
-
 <body>
-
     <header>
-
         <h1>Anomaly Detection Z Score</h1>
-
         <a href="/">Home</a>
-
     </header>
 
-
     <div class="container">
-
         <div class="model-box">
-
             <h2>Anomaly Detection</h2>
-
-            <p>
-                Anomaly detection is used to detect any un usual element/value in a dataset.
-            </p>
-
-            <button onclick="runModel()">
-                Run AD
-            </button>
-
+            <p>Anomaly detection is used to detect any unusual element/value in a dataset.</p>
+            <button onclick="runModel()">Run AD</button>
         </div>
-
 
         <div id="result" class="result">
-
             <h2>Results</h2>
-
         </div>
-
     </div>
 
-
     <script>
-
         function runModel() {
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "<h2>Processing...</h2>";
 
             fetch("/run-anomaly_detection_z_scoring", {
-
                 method: "POST"
-
             })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = "<h2>Error</h2><p>" + data.error + "</p>";
+                    return;
+                }
 
-                .then(response => response.json())
+                let html = "<h2>Analysis Complete</h2>";
 
-                .then(data => {
+                for (let colName in data) {
+                    let colData = data[colName];
+                    
+                    html += "<div class='column-card'>";
+                    html += "<h3 class='column-header'>" + colName + "</h3>";
+                    html += "<div>";
+                    html += "<span class='metric-badge'><strong>Mean:</strong> " + colData.mean + "</span>";
+                    html += "<span class='metric-badge'><strong>SD:</strong> " + colData.sd + "</span>";
+                    html += "</div>";
 
-                    if (data.error) {
-
-                        document.getElementById("result").innerHTML =
-                            "<h2>Error</h2><p>"
-                            + data.error
-                            + "</p>";
-
-                        return;
-
-                    }
-
-
-                    let html = "";
-
-                    html +=
-                        "<h2>"
-                        + data.model
-                        + "</h2>";
-
-                    html +=
-                        "<p>Total Components: "
-                        + data.total_components
-                        + "</p>";
-
-
-                    html += "<h3>Explained Variance</h3>";
-
-                    html += "<ul>";
-
-                    data.explained_variance.forEach(
-                        function (value, index) {
-
-                            html +=
-                                "<li>PC"
-                                + (index + 1)
-                                + ": "
-                                + Number(value).toFixed(2)
-                                + "%</li>";
-
+                    if (colData.has_anomalies && colData.anomaly_ids.length > 0) {
+                        html += "<p style='color:#c62828; font-weight:bold; margin-bottom:5px;'>Anomalies Found:</p>";
+                        html += "<ul class='anomaly-list'>";
+                        for (let i = 0; i < colData.anomaly_ids.length; i++) {
+                            html += "<li><strong>ID " + colData.anomaly_ids[i] + ":</strong> Value: " + colData.anomaly_values[i] + " (Z-Score > 2)</li>";
                         }
-                    );
+                        html += "</ul>";
+                    } else {
+                        html += "<p class='no-anomaly'>No anomalies detected (all values fall within 2 standard deviations).</p>";
+                    }
+                    
+                    html += "</div>";
+                }
 
-                    html += "</ul>";
-
-
-                    document.getElementById("result").innerHTML =
-                        html;
-
-                });
-
+                resultDiv.innerHTML = html;
+            })
+            .catch(err => {
+                resultDiv.innerHTML = "<h2>Error</h2><p>" + err.message + "</p>";
+            });
         }
-
     </script>
-
 </body>
-
 </html>
