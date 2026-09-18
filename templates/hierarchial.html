@@ -15,7 +15,15 @@
             <h2>Hierarchial Clustering Model</h2>
             <p>Method: Complete Linkage</p>
             <button onclick="runModel()">Run Model</button>
+
+            <div style="background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center;">
+                <h3 style="margin-top: 0;">Dendrogram Tree Plot: </h3>
+                <!-- Plot placeholder element -->
+                <img id="dendrogram-img" src="" alt="" style="width: 100%; height: auto; border: 1px solid #eee; border-radius: 4px;">
+            </div>
         </div>
+
+        
 
         <!-- Initial text feedback wrapper -->
         <div id="status-message">
@@ -35,12 +43,7 @@
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: Visual Dendrogram Plot Canvas -->
-            <div style="background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center;">
-                <h3 style="margin-top: 0;">Dendrogram Tree Plot</h3>
-                <!-- Plot placeholder element -->
-                <img id="dendrogram-img" src="" alt="Hierarchial Tree Structure Graph" style="width: 100%; height: auto; border: 1px solid #eee; border-radius: 4px;">
-            </div>
+            
 
         </div>
     </div>
