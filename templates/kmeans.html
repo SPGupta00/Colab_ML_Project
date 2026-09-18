@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>K-Means Clustering</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+    <header>
+
+        <h1>K-Means Clustering</h1>
+
+        <a href="/">Home</a>
+
+    </header>
+
+
+    <div class="container">
+
+        <div class="model-box">
+
+            <h2>Run K-Means Model</h2>
+
+            <label>Number of Clusters</label>
+
+            <input type="number" id="clusters" value="3" min="2" max="10">
+
+            <button onclick="runModel()">
+                Run Model
+            </button>
+
+        </div>
+
+
+        <div id="result" class="result">
+
+            <h2>Results</h2>
+
+            <p>Run the model to see results.</p>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        function runModel() {
+
+            let clusters =
+                document.getElementById("clusters").value;
+
+            let formData = new FormData();
+
+            formData.append("clusters", clusters);
+
+
+            fetch("/run-kmeans", {
+
+                method: "POST",
+
+                body: formData
+
+            })
+
+                .then(response => response.json())
+
+                .then(data => {
+
+                    if (data.error) {
+
+                        document.getElementById("result").innerHTML =
+                            "<h2>Error</h2><p>" + data.error + "</p>";
+
+                        return;
+
+                    }
+
+
+                    let html = "";
+
+                    html += "<h2>" + data.model + "</h2>";
+
+                    html +=
+                        "<p>Total Data Points: "
+                        + data.total_points
+                        + "</p>";
+
+                    html +=
+                        "<p>Number of Clusters: "
+                        + data.clusters
+                        + "</p>";
+
+
+                    html += "<h3>Cluster Sizes</h3>";
+
+                    html += "<ul>";
+
+                    data.cluster_sizes.forEach(
+                        function (size, index) {
+
+                            html +=
+                                "<li>Cluster "
+                                + (index + 1)
+                                + ": "
+                                + size
+                                + " points</li>";
+
+                        }
+                    );
+
+                    html += "</ul>";
+
+
+                    document.getElementById("result").innerHTML =
+                        html;
+
+                })
+
+                .catch(error => {
+
+                    document.getElementById("result").innerHTML =
+                        "<h2>Error</h2><p>"
+                        + error
+                        + "</p>";
+
+                });
+
+        }
+
+    </script>
+
+</body>
+
+</html>

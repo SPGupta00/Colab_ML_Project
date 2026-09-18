@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Unsupervised Machine Learning</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+    <header>
+
+        <h1>Unsupervised Machine Learning</h1>
+
+        <p>R + Flask Machine Learning Demonstration</p>
+
+    </header>
+
+
+    <div class="container">
+
+        <div class="card">
+
+            <h2>K-Means Clustering</h2>
+
+            <p>
+                Groups similar data points into clusters.
+            </p>
+
+            <a href="/kmeans">
+                <button>Open Model</button>
+            </a>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>Hierarchical Clustering</h2>
+
+            <p>
+                Creates a hierarchy of clusters using a dendrogram.
+            </p>
+
+            <a href="/hierarchical">
+                <button>Open Model</button>
+            </a>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>Principal Component Analysis</h2>
+
+            <p>
+                Reduces the dimensionality of numerical data.
+            </p>
+
+            <a href="/pca">
+                <button>Open Model</button>
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
