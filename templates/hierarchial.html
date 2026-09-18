@@ -10,43 +10,49 @@
         <a href="/">Home</a>
     </header>
 
-    <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 20px;">
-        <div class="model-box" style="margin-bottom: 20px;">
-            <h2>Hierarchial Clustering Model</h2>
-            <p>Method: Complete Linkage</p>
-            <button onclick="runModel()">Run Model</button>
-
-            <div style="background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center;">
-                <h3 style="margin-top: 0;">Dendrogram Tree Plot: </h3>
-                <!-- Plot placeholder element -->
-                <img id="dendrogram-img" src="" alt="" style="width: 100%; height: auto; border: 1px solid #eee; border-radius: 4px;">
-            </div>
-        </div>
-
+    <!-- MAIN STRUCTURAL WRAPPER: Flex layout mounts components side-by-side -->
+    <div class="container" style="max-width: 1500px; margin: 0 auto; padding: 20px; display: flex; gap: 25px; align-items: start;">
         
+        <!-- LEFT COLUMN: Parameter input and Plot Canvas -->
+        <div style="flex: 1; min-width: 450px;">
+            <div class="model-box" style="margin-bottom: 20px; box-sizing: border-box;">
+                <h2>Hierarchial Clustering Model</h2>
+                <p>Method: Complete Linkage</p>
+                <button onclick="runModel()">Run Model</button>
 
-        <!-- Initial text feedback wrapper -->
-        <div id="status-message">
-            <h2>Results</h2>
-            <p>Run the model to see output data points and assigned clusters.</p>
-        </div>
-
-        <!-- TWO-COLUMN LAYOUT SYSTEM (Initially hidden) -->
-        <div id="result-layout" style="display: none; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 25px; align-items: start;">
-            
-            <!-- LEFT COLUMN: Data Record Matrix Tables -->
-            <div style="background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                <div id="metrics-summary"></div>
-                <h3 style="margin-top: 20px;">Assigned Data Clusters</h3>
-                <div id="table-container" style="max-height: 550px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
-                    <!-- JS injects table elements here -->
+                <div style="background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; margin-top: 20px; box-sizing: border-box;">
+                    <h3 style="margin-top: 0;">Dendrogram Tree Plot: </h3>
+                    <!-- Plot placeholder element -->
+                    <img id="dendrogram-img" src="" alt="" style="width: 100%; height: auto; border: 1px solid #eee; border-radius: 4px;">
                 </div>
             </div>
-
-            
-
         </div>
+
+        <!-- RIGHT COLUMN: Interactive Status text & Result table layout -->
+        <div style="flex: 1.5; min-width: 500px;">
+            <!-- Initial text feedback wrapper -->
+            <div id="status-message" style="background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-top: 0;">
+                <h2>Results</h2>
+                <p>Run the model to see output data points and assigned clusters.</p>
+            </div>
+
+            <!-- RESULTS LAYOUT (Initially hidden, margin-top minimized to zero) -->
+            <div id="result-layout" style="display: none; width: 100%; margin-top: 0;">
+                <div style="background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;">
+                    <div id="metrics-summary"></div>
+                    <h3 style="margin-top: 15px; margin-bottom: 10px;">Assigned Data Clusters</h3>
+                    <div id="table-container" style="max-height: 650px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; width: 100%;">
+                        <!-- JS injects table elements here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <footer>
+        <p>Hierarchial Model Demo.</p>
+    </footer>
 
     <script>
         function runModel() {
@@ -72,7 +78,7 @@
                 document.getElementById("status-message").style.display = "none";
 
                 // 1. Build and inject text metrics summary data
-                let summaryHtml = "<h2>Hierarchial Clustering Completed</h2>";
+                let summaryHtml = "<h2 style='margin-top:0;'>Hierarchial Clustering Completed</h2>";
                 summaryHtml += "<p><strong>Total Processed Points:</strong> " + records.length + "</p>";
                 document.getElementById("metrics-summary").innerHTML = summaryHtml;
                 
@@ -94,14 +100,13 @@
 
                 // 3. Extract the plot_url payload from R script and map to image source element node
                 const dendroImg = document.getElementById("dendrogram-img");
-                // Uses fallback pathing if plot_url isn't explicitly returned from the payload dictionary object
                 let assetPath = payload.plot_url ? payload.plot_url : "/static/hierarchical_plot.png";
                 
                 // Appends unique date timestamp token parameter avoiding aggressive browser engine memory caching
                 dendroImg.src = assetPath + "?t=" + new Date().getTime();
 
-                // Expose complete visual container layouts grid system
-                document.getElementById("result-layout").style.display = "grid";
+                // Expose complete visual container layouts block
+                document.getElementById("result-layout").style.display = "block";
             })
             .catch(error => {
                 document.getElementById("status-message").style.display = "block";
