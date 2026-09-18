@@ -1,31 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>hierarchial Clustering</title>
+    <title>Hierarchial Clustering</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <header>
-        <h1>hierarchial Clustering</h1>
+        <h1>Hierarchial Clustering</h1>
         <a href="/">Home</a>
     </header>
 
-    <div class="container">
-        <div class="model-box">
-            <h2>hierarchial Clustering Model</h2>
+    <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 20px;">
+        <div class="model-box" style="margin-bottom: 20px;">
+            <h2>Hierarchial Clustering Model</h2>
             <p>Method: Complete Linkage</p>
             <button onclick="runModel()">Run Model</button>
         </div>
 
-        <div id="result" class="result">
+        <!-- Initial text feedback wrapper -->
+        <div id="status-message">
             <h2>Results</h2>
             <p>Run the model to see output data points and assigned clusters.</p>
+        </div>
+
+        <!-- TWO-COLUMN LAYOUT SYSTEM (Initially hidden) -->
+        <div id="result-layout" style="display: none; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 25px; align-items: start;">
+            
+            <!-- LEFT COLUMN: Data Record Matrix Tables -->
+            <div style="background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <div id="metrics-summary"></div>
+                <h3 style="margin-top: 20px;">Assigned Data Clusters</h3>
+                <div id="table-container" style="max-height: 550px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+                    <!-- JS injects table elements here -->
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Visual Dendrogram Plot Canvas -->
+            <div style="background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center;">
+                <h3 style="margin-top: 0;">Dendrogram Tree Plot</h3>
+                <!-- Plot placeholder element -->
+                <img id="dendrogram-img" src="" alt="Hierarchial Tree Structure Graph" style="width: 100%; height: auto; border: 1px solid #eee; border-radius: 4px;">
+            </div>
+
         </div>
     </div>
 
     <script>
         function runModel() {
-            document.getElementById("result").innerHTML = "<h2>Processing...</h2><p>Running R script clustering calculations...</p>";
+            // Display processing messaging layout 
+            document.getElementById("status-message").innerHTML = "<h2>Processing...</h2><p>Running R script clustering calculations...</p>";
+            document.getElementById("status-message").style.display = "block";
+            document.getElementById("result-layout").style.display = "none";
 
             fetch("/run-hierarchial", {
                 method: "POST"
@@ -33,36 +58,51 @@
             .then(response => response.json())
             .then(payload => {
                 if (payload.error) {
-                    document.getElementById("result").innerHTML = "<h2>Error</h2><p>" + payload.error + "</p>";
+                    document.getElementById("status-message").innerHTML = "<h2>Error</h2><p>" + payload.error + "</p>";
                     return;
                 }
 
                 // Extracted array sent from R list(data = dframe)
                 let records = payload.data; 
 
-                let html = "<h2>Hierarchial Clustering Completed</h2>";
-                html += "<p><strong>Total Processed Points:</strong> " + records.length + "</p>";
+                // Hide initial status text message box
+                document.getElementById("status-message").style.display = "none";
+
+                // 1. Build and inject text metrics summary data
+                let summaryHtml = "<h2>Hierarchial Clustering Completed</h2>";
+                summaryHtml += "<p><strong>Total Processed Points:</strong> " + records.length + "</p>";
+                document.getElementById("metrics-summary").innerHTML = summaryHtml;
                 
-                // Construct a table to present the row points and assigned clusters
-                html += "<h3>Assigned Data Clusters</h3>";
-                html += "<table border='1' style='width:100%; border-collapse: collapse; text-align: left;'>";
-                html += "<tr style='background-color: #f2f2f2;'><th>Customer ID</th><th>Age</th><th>Annual Income</th><th>Spending Score</th><th>Assigned Cluster</th></tr>";
+                // 2. Construct the data results mapping matrix table
+                let tableHtml = "<table border='1' style='width:100%; border-collapse: collapse; text-align: left;'>";
+                tableHtml += "<tr style='background-color: #f2f2f2; position: sticky; top: 0; z-index: 10;'><th>Customer ID</th><th>Age</th><th>Annual Income</th><th>Spending Score</th><th>Assigned Cluster</th></tr>";
                 
                 records.forEach(row => {
-                    html += `<tr>
-                        <td>${row.CustomerID || 'N/A'}</td>
-                        <td>${row.Age || 'N/A'}</td>
-                        <td>${row.AnnualIncome || 'N/A'}</td>
-                        <td>${row.SpendingScore || 'N/A'}</td>
-                        <td><strong style="color: blue;">Cluster ${row.Cluster}</strong></td>
+                    tableHtml += `<tr>
+                        <td style="padding: 8px;">${row.CustomerID || 'N/A'}</td>
+                        <td style="padding: 8px;">${row.Age || 'N/A'}</td>
+                        <td style="padding: 8px;">${row.AnnualIncome || 'N/A'}</td>
+                        <td style="padding: 8px;">${row.SpendingScore || 'N/A'}</td>
+                        <td style="padding: 8px;"><strong style="color: blue;">Cluster ${row.Cluster}</strong></td>
                     </tr>`;
                 });
-                html += "</table>";
+                tableHtml += "</table>";
+                document.getElementById("table-container").innerHTML = tableHtml;
 
-                document.getElementById("result").innerHTML = html;
+                // 3. Extract the plot_url payload from R script and map to image source element node
+                const dendroImg = document.getElementById("dendrogram-img");
+                // Uses fallback pathing if plot_url isn't explicitly returned from the payload dictionary object
+                let assetPath = payload.plot_url ? payload.plot_url : "/static/hierarchical_plot.png";
+                
+                // Appends unique date timestamp token parameter avoiding aggressive browser engine memory caching
+                dendroImg.src = assetPath + "?t=" + new Date().getTime();
+
+                // Expose complete visual container layouts grid system
+                document.getElementById("result-layout").style.display = "grid";
             })
             .catch(error => {
-                document.getElementById("result").innerHTML = "<h2>JavaScript Error</h2><p>" + error + "</p>";
+                document.getElementById("status-message").style.display = "block";
+                document.getElementById("status-message").innerHTML = "<h2>JavaScript Error</h2><p>" + error + "</p>";
             });
         }
     </script>
