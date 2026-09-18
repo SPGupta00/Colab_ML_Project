@@ -25,7 +25,7 @@ def hierarchical_page():
 
 @app.route("/anomaly_detection_z_score")
 def pca_page():
-    return render_template("pcanomaly_detection_z_score.html")
+    return render_template("anomaly_detection_z_score.html")
 
 
 # --- API Execution Routes ---
