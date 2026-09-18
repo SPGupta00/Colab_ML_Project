@@ -12,7 +12,8 @@ body {
     background: #f4f6f8;
 
     color: #222;
-
+     
+    height : 100vh;
 }
 
 
@@ -152,3 +153,19 @@ input {
     margin: 10px 0;
 
 }
+
+footer {
+
+    background: white;
+
+    color: #1f2937;
+
+    text-align: center;
+
+    padding: 20px;
+
+    margin-top: 340px;
+
+    margin-bottom: 20px;
+}
+
