@@ -89,7 +89,7 @@ def run_hierarchical():
         }), 500
 
 
-@app.route("/run-pca", methods=["POST"])
+@app.route("/run-anomaly_detection_z_model", methods=["POST"])
 def run_pca():
 
     try:
@@ -97,7 +97,7 @@ def run_pca():
         result = subprocess.run(
             [
                 R_PATH,
-                "r_models/pca.R",
+                "r_models/anomaly_detection_z_model.R",
                 "data/data.csv"
             ],
             capture_output=True,
