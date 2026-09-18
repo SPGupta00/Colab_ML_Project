@@ -1,27 +1,57 @@
-if (!requireNamespace("jsonlite", quietly = TRUE)) install.packages("jsonlite", repos="https://r-project.org")
-library(jsonlite)
-
 dframe <- read.csv("data/data.csv")
 
-numeric_cols <- sapply(dframe, is.numeric)
-data_numeric <- dframe[, numeric_cols, drop = FALSE]
+data <- data.frame(dframe)
 
-mean_values <- colMeans(data_numeric, na.rm = TRUE)
-sd_values   <- apply(data_numeric, 2, sd, na.rm = TRUE)
+# Display the data
+print(data)
 
-z_scores <- scale(data_numeric, center = mean_values, scale = sd_values)
 
-anomaly_matrix <- abs(z_scores) > 2
-has_anomaly <- rowSums(anomaly_matrix, na.rm = TRUE) > 0
+# Step 2: Calculate the mean
+# Mean = average value
 
-anomaly_rows <- dframe[has_anomaly, , drop = FALSE]
-normal_rows  <- dframe[!has_anomaly, , drop = FALSE]
+mean_value <- mean(data)
 
-output_data <- list(
-  total_records = nrow(dframe),
-  anomaly_count = nrow(anomaly_rows),
-  anomalies     = anomaly_rows,
-  normal_data   = normal_rows
-)
+# Display mean
+print(mean_value)
 
-cat(toJSON(output_data, auto_unbox = TRUE, pretty = TRUE))
+
+# Step 3: Calculate standard deviation
+
+sd_value <- sd(data)
+
+# Display standard deviation
+print(sd_value)
+
+
+# Step 4: Calculate Z-score for every value
+# Z-score tells us how far a value is from the mean
+
+z_score <- (data - mean_value) / sd_value
+
+# Display Z-scores
+print(z_score)
+
+
+# Step 5: Find anomalies
+# If the absolute Z-score is greater than 2,
+# we consider it an anomaly
+
+anomaly <- abs(z_score) > 2
+
+
+# Step 6: Display the anomaly result
+
+print(anomaly)
+
+
+# Step 7: Display only the anomaly values
+
+print(data[anomaly])
+
+
+# Step 8: Display normal values
+
+print(data[!anomaly])
+
+cat("Anomaly values are:\n")
+print(data[anomaly])
